@@ -13,9 +13,7 @@ impl Pattern {
 
     pub fn new(length: usize, pulses: usize, rotation: isize) -> Self {
         let mut pattern = Pattern::with_length(length);
-        if pulses > 0 {
-            pattern.pulses(pulses);
-        }
+        pattern.pulses(pulses);
         pattern.rotate(rotation);
         pattern
     }
