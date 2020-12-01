@@ -27,7 +27,7 @@ impl Pattern {
         }
         Self {
             steps,
-            length: length.clone(),
+            length,
             cursor: 0,
         }
     }
