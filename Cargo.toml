@@ -1,0 +1,8 @@
+[package]
+name = "rhythms"
+version = "0.1.0"
+authors = ["Isis T. Baulig <grindcode@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+smallvec = "1.5"
