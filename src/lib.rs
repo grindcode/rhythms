@@ -1,7 +1,10 @@
+//! A WIP prototype for rhythmic pattern generation in Rust with `no_std` support.
+
 #![no_std]
 
 use smallvec::SmallVec;
 
+/// The main building block for pattern generation
 #[derive(Debug, Clone)]
 pub struct Pattern {
     steps: SmallVec<[bool; 64]>,
@@ -10,7 +13,20 @@ pub struct Pattern {
 }
 
 impl Pattern {
-
+    /// Returns a pattern with given length, number of pulses and rotation
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - Total number of steps
+    /// * `pulses` - The number of pulses
+    /// * `rotation` - Number of rotation steps. Polarity represents direction
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let pattern = Pattern::new(8, 4, -1);
+    /// ```
     pub fn new(length: usize, pulses: usize, rotation: isize) -> Self {
         let mut pattern = Pattern::with_length(length);
         pattern.pulses(pulses);
@@ -18,6 +34,18 @@ impl Pattern {
         pattern
     }
 
+    /// Returns a pattern with given length
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - Total number of steps
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let pattern = Pattern::with_length(8);
+    /// ```
     pub fn with_length(length: usize) -> Self {
         let mut steps = SmallVec::new();
         for _ in 0..length {
@@ -30,6 +58,18 @@ impl Pattern {
         }
     }
 
+    /// Returns a pattern based on a boolean slice
+    ///
+    /// # Arguments
+    ///
+    /// * `slice` - A boolean slice holding the initial pattern
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let pattern = Pattern::from_slice(&[true, false, true, false]);
+    /// ```
     pub fn from_slice(slice: &[bool]) -> Self {
         Self {
             steps: SmallVec::from_slice(slice),
@@ -38,6 +78,23 @@ impl Pattern {
         }
     }
 
+    /// Updates the current pattern with a number of pulses, using an abstraction based on 
+    /// Bjorklund's Euclidean algorithm.
+    ///
+    /// # Arguments
+    ///
+    /// * `pulses` - Total number of pulses
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::with_length(8);
+    /// pattern.pulses(2);
+    /// // or
+    /// let mut pattern = Pattern::new(8, 4, 0);
+    /// pattern.pulses(2);
+    /// ```
     pub fn pulses(&mut self, pulses: usize) -> &mut Self {
         if pulses == 0 {
             return self
@@ -66,6 +123,24 @@ impl Pattern {
         self
     }
 
+    /// Rotates the current pattern
+    ///
+    /// # Arguments
+    ///
+    /// * `rotation` - Number of rotation steps. Polarity represents direction
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::with_length(8);
+    /// pattern.pulses(2);
+    /// pattern.rotate(-1);
+    /// // or
+    /// let mut pattern = Pattern::new(8, 4, 0);
+    /// pattern.pulses(2);
+    /// pattern.rotate(3);
+    /// ```
     pub fn rotate(&mut self, rotation: isize) -> &mut Self {
         if rotation.is_positive() {
             self.steps.rotate_right(rotation as usize);
@@ -75,10 +150,33 @@ impl Pattern {
         self
     }
 
+    /// Returns a boolean slice reprensenting the pattern
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let pattern = Pattern::new(8, 2, 0);
+    /// let slice = pattern.as_slice();
+    /// ```
     pub fn as_slice(&self) -> &[bool] {
         self.steps.as_slice()
     }
 
+    /// Returns the state of a step
+    ///
+    /// # Arguments
+    ///
+    /// * `step` - Step identifiyer. Range starts at 0
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::new(8, 4, 0);
+    /// let first_step = pattern.step(0);
+    /// let third_step = pattern.step(2);
+    /// ```
     pub fn step(&self, step: usize) -> Option<bool> {
         if step < self.steps.len() {
             Some(self.steps[step])
@@ -87,6 +185,15 @@ impl Pattern {
         }
     }
 
+    /// Returns length of current pattern
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let pattern = Pattern::new(8, 2, 0);
+    /// let length = pattern.len();
+    /// ```
     pub fn len(&self) -> usize {
         self.steps.len()
     }
