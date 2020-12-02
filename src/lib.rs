@@ -186,17 +186,14 @@ impl Pattern {
     ///
     /// ```
     /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::with_length(8);
-    /// pattern.pulses(2);
-    /// pattern.rotate(-1);
     /// let mut pattern = Pattern::with_length(3);
     /// pattern.pulses(1);
     /// assert_eq!([false, true, false], pattern.as_slice());
     /// pattern.rotate(-1);
     /// assert_eq!([true, false, false], pattern.as_slice());
     /// // or
-    /// let pattern = Pattern::new(4, 2, -1);
-    /// assert_eq!([false, true, false, true], pattern.as_slice());
+    /// let pattern = Pattern::new(3, 1, -1);
+    /// assert_eq!([true, false, false], pattern.as_slice());
     /// ```
     pub fn rotate(&mut self, rotation: isize) -> &mut Self {
         self.rotation = rotation;
