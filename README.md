@@ -1,8 +1,6 @@
 # rhythms
 
-A WIP prototype for rhythmic pattern generation in Rust.
-
-## `no_std` support
+Rhythmic pattern generation in Rust. This projet is Work In Progress, and the API is subjective to change. Use at your own risk.
 
 By design, `rhythms` does not depend on `std`.
 
