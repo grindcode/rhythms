@@ -1,4 +1,4 @@
-//! A WIP prototype for rhythmic pattern generation in Rust with `no_std` support.
+//! A WIP prototype for rhythmic pattern generation with `no_std` support.
 
 #![no_std]
 

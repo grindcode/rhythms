@@ -1,8 +1,13 @@
 [package]
 name = "rhythms"
 version = "0.1.0"
-authors = ["Isis T. Baulig <grindcode@gmail.com>"]
 edition = "2018"
+authors = ["Isis T. Baulig <grindcode@gmail.com>"]
+license = "MIT/Apache-2.0"
+repository = "https://github.com/grindcode/rhythms"
+description = "Algorithmic pattern generation"
+keywords = ["pattern", "music", "euclidean", "rhythm", "no_std"]
+readme = "README.md"
 
 [dependencies]
 smallvec = "1.5"
