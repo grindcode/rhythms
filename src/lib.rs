@@ -64,45 +64,6 @@ impl Pattern {
         }
     }
 
-    /// Clears all pulses from a pattern
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::new(4, 2, 0);
-    /// assert_eq!([true, false, true, false], pattern.as_slice());
-    /// pattern.clear();
-    /// assert_eq!([false, false, false, false], pattern.as_slice());
-    /// ```
-    pub fn clear(&mut self) {
-        self.steps.clear();
-        for _ in 0..self.length {
-            self.steps.push(false);
-        }
-    }
-
-    /// Resize the current pattern
-    ///
-    /// # Arguments
-    ///
-    /// * `length` - Total number of steps
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::with_length(8);
-    /// pattern.resize(4);
-    /// assert_eq!(4, pattern.len());
-    /// ```
-    pub fn resize(&mut self, length: usize) -> &mut Self {
-        self.steps = SmallVec::with_capacity(length);
-        self.length = length;
-        self.pulses(self.pulses);
-        self
-    }
-
     /// Returns a pattern based on a boolean slice
     ///
     /// # Arguments
@@ -126,12 +87,52 @@ impl Pattern {
         }
     }
 
-    /// Updates the current pattern with a number of pulses, using an abstraction based on 
-    /// Bjorklund's Euclidean algorithm.
+    /// Clears all pulses from a pattern
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::new(4, 2, 0);
+    /// assert_eq!([true, false, true, false], pattern.as_slice());
+    /// pattern.clear();
+    /// assert_eq!([false, false, false, false], pattern.as_slice());
+    /// ```
+    pub fn clear(&mut self) {
+        self.steps.clear();
+        for _ in 0..self.length {
+            self.steps.push(false);
+        }
+    }
+
+    /// Resize the current pattern. If length is
     ///
     /// # Arguments
     ///
-    /// * `pulses` - Total number of pulses
+    /// * `length` - Total number of steps
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::with_length(1);
+    /// assert_eq!([false], pattern.as_slice());
+    /// pattern.resize(4);
+    /// assert_eq!(4, pattern.len());
+    /// assert_eq!([false, false, false, false], pattern.as_slice());
+    /// ```
+    pub fn resize(&mut self, length: usize) {
+        self.steps.resize(length, false);
+        self.length = length;
+    }
+
+    /// Updates the current pattern with a evenly distributed number of pulses, using an
+    /// abstraction based on Bjorklund's Euclidean algorithm.
+    ///
+    /// # Arguments
+    ///
+    /// * `pulses` - Total number of pulses, from `0` to the pattern length. If `pulses` exceeds
+    /// the pattern length, the max value will be used
     ///
     /// # Examples
     ///
@@ -146,34 +147,29 @@ impl Pattern {
     /// pattern.pulses(2);
     /// assert_eq!([true, false, true, false], pattern.as_slice());
     /// ```
-    pub fn pulses(&mut self, pulses: usize) -> &mut Self {
-        if pulses == 0 {
-            self.clear();
-            return self
-        }
-        let length = self.length;
-        let pulses = if pulses > length {
-            length
+    pub fn pulses(&mut self, pulses: usize) {
+        self.pulses = if pulses > self.length {
+            self.length
         } else {
             pulses
         };
+
         self.steps.clear();
-        self.pulses = pulses;
         let mut bucket: usize = 0;
-        for _ in 0..length {
-            bucket += pulses;
-            if bucket >= length {
-                bucket -= length;
+        for _ in 0..self.length {
+            bucket += self.pulses;
+            if bucket >= self.length {
+                bucket -= self.length;
                 self.steps.push(true);
             } else {
                 self.steps.push(false);
             }
         }
-        if length > 0 {
-            let offset = length / pulses - 1;
+
+        if self.length > 0 && self.pulses > 0 {
+            let offset = self.length / self.pulses - 1;
             self.steps.rotate_right(offset);
         }
-        self
     }
 
     /// Rotates the current pattern
@@ -195,14 +191,13 @@ impl Pattern {
     /// let pattern = Pattern::new(3, 1, -1);
     /// assert_eq!([true, false, false], pattern.as_slice());
     /// ```
-    pub fn rotate(&mut self, rotation: isize) -> &mut Self {
+    pub fn rotate(&mut self, rotation: isize) {
         self.rotation = rotation;
         if rotation.is_positive() {
             self.steps.rotate_right(rotation as usize);
         } else if rotation.is_negative() {
             self.steps.rotate_left(rotation.abs() as usize);
         }
-        self
     }
 
     /// Returns a boolean slice reprensenting the pattern
@@ -270,7 +265,7 @@ impl Pattern {
     /// ```
     pub fn next_looped(&mut self) -> bool {
         let step = self.steps[self.cursor];
-        if self.cursor == self.len() - 1 {
+        if self.cursor == self.last_index() {
             self.reset();
         } else {
             self.move_cursor(self.cursor + 1);
@@ -312,11 +307,19 @@ impl Pattern {
     /// assert_eq!(Some(false), pattern.next());
     /// ```
     pub fn move_cursor(&mut self, step: usize) {
-        self.cursor = if step >= self.len() {
-            self.len() - 1
-        } else {
+        self.cursor = if self.is_in_range(step) {
             step
+        } else {
+            self.last_index()
         };
+    }
+
+    fn is_in_range(&self, step: usize) -> bool {
+        step < self.len()
+    }
+
+    fn last_index(&self) -> usize {
+        self.len() - 1
     }
 }
 
@@ -332,7 +335,7 @@ impl Pattern {
 impl Iterator for Pattern {
     type Item = bool;
     fn next(&mut self) -> Option<bool> { 
-        if self.cursor < self.steps.len() {
+        if self.is_in_range(self.cursor) {
             let current = self.cursor;
             self.cursor += 1;
             Some(self.steps[current])
@@ -424,6 +427,25 @@ mod tests {
         let pattern = Pattern::new(8, 9, 0);
         assert_eq!(
             [true, true, true, true, true, true, true, true],
+            pattern.as_slice()
+        );
+    }
+
+    #[test]
+    fn zero_length() {
+        let pattern = Pattern::with_length(0);
+        assert_eq!(
+            0,
+            pattern.len()
+        );
+    }
+
+    #[test]
+    fn zero_pulses() {
+        let mut pattern = Pattern::with_length(2);
+        pattern.pulses(0);
+        assert_eq!(
+            [false, false],
             pattern.as_slice()
         );
     }
