@@ -8,6 +8,7 @@ repository = "https://github.com/grindcode/rhythms"
 description = "A rhythmic pattern generation library"
 keywords = ["pattern", "music", "euclidean", "rhythm", "no_std"]
 readme = "README.md"
+exclude = [".github"]
 
 [dependencies]
 smallvec = "1.5"
