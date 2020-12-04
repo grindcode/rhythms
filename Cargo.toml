@@ -5,7 +5,7 @@ edition = "2018"
 authors = ["Isis T. Baulig <grindcode@gmail.com>"]
 license = "MIT/Apache-2.0"
 repository = "https://github.com/grindcode/rhythms"
-description = "Algorithmic pattern generation"
+description = "A rhythmic pattern generation library"
 keywords = ["pattern", "music", "euclidean", "rhythm", "no_std"]
 readme = "README.md"
 

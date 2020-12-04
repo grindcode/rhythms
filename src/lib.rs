@@ -1,10 +1,28 @@
-//! A WIP prototype for rhythmic pattern generation with `no_std` support.
+//! A rhythmic pattern generation library with `no_std` support.
+//! 
+//! This project is under development and the current API is subjective to change.
+//! Please use at your own risk.
+//! 
+//! ## Example
+//! 
+//! ```
+//! use rhythms::Pattern;
+//! 
+//! let pattern = Pattern::new(4, 2, 0);
+//! assert_eq!([true, false, true, false], pattern.as_slice());
+//! 
+//! // or
+//! let mut pattern = Pattern::with_length(4);
+//! pattern.pulses(2);
+//! pattern.rotate(-1);
+//! assert_eq!([false, true, false, true], pattern.as_slice());
+//! ```
 
 #![no_std]
 
 use smallvec::SmallVec;
 
-/// The main building block for pattern generation
+/// The main pattern building block
 #[derive(Debug, Clone)]
 pub struct Pattern {
     steps: SmallVec<[bool; 64]>,
