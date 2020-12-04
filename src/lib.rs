@@ -105,45 +105,6 @@ impl Pattern {
         }
     }
 
-    /// Clears all pulses from a pattern
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::new(4, 2, 0);
-    /// assert_eq!([true, false, true, false], pattern.as_slice());
-    /// pattern.clear();
-    /// assert_eq!([false, false, false, false], pattern.as_slice());
-    /// ```
-    pub fn clear(&mut self) {
-        self.steps.clear();
-        for _ in 0..self.length {
-            self.steps.push(false);
-        }
-    }
-
-    /// Resize the current pattern. If length is
-    ///
-    /// # Arguments
-    ///
-    /// * `length` - Total number of steps
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::with_length(1);
-    /// assert_eq!([false], pattern.as_slice());
-    /// pattern.resize(4);
-    /// assert_eq!(4, pattern.len());
-    /// assert_eq!([false, false, false, false], pattern.as_slice());
-    /// ```
-    pub fn resize(&mut self, length: usize) {
-        self.steps.resize(length, false);
-        self.length = length;
-    }
-
     /// Updates the current pattern with a evenly distributed number of pulses, using an
     /// abstraction based on Bjorklund's Euclidean algorithm.
     ///
@@ -218,17 +179,84 @@ impl Pattern {
         }
     }
 
-    /// Returns a boolean slice reprensenting the pattern
+    /// Clears all pulses from a pattern
     ///
     /// # Examples
     ///
     /// ```
     /// use rhythms::Pattern;
-    /// let pattern = Pattern::new(4, 2, 1);
-    /// assert_eq!([false, true, false, true], pattern.as_slice());
+    /// let mut pattern = Pattern::new(4, 2, 0);
+    /// assert_eq!([true, false, true, false], pattern.as_slice());
+    /// pattern.clear();
+    /// assert_eq!([false, false, false, false], pattern.as_slice());
     /// ```
-    pub fn as_slice(&self) -> &[bool] {
-        self.steps.as_slice()
+    pub fn clear(&mut self) {
+        self.steps.clear();
+        for _ in 0..self.length {
+            self.steps.push(false);
+        }
+    }
+
+    /// Resize the current pattern. If length is
+    ///
+    /// # Arguments
+    ///
+    /// * `length` - Total number of steps
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::with_length(1);
+    /// assert_eq!([false], pattern.as_slice());
+    /// pattern.resize(4);
+    /// assert_eq!(4, pattern.len());
+    /// assert_eq!([false, false, false, false], pattern.as_slice());
+    /// ```
+    pub fn resize(&mut self, length: usize) {
+        self.steps.resize(length, false);
+        self.length = length;
+    }
+
+    /// Moves the pattern cursor to the first step
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::new(4, 2, 0);
+    /// assert_eq!([true, false, true, false], pattern.as_slice());
+    /// assert_eq!(Some(true), pattern.next());
+    /// pattern.reset();
+    /// assert_eq!(Some(true), pattern.next());
+    /// ```
+    pub fn reset(&mut self) {
+        self.move_cursor(0);
+    }
+
+    /// Moves the pattern cursor to a given step. If step overflows, it will move to the last step
+    ///
+    /// # Arguments
+    ///
+    /// * `step` - Step identifiyer. Range starts at 0
+    /// 
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let mut pattern = Pattern::new(4, 2, 0);
+    /// assert_eq!([true, false, true, false], pattern.as_slice());
+    /// assert_eq!(Some(true), pattern.next());
+    /// assert_eq!(Some(false), pattern.next());
+    /// pattern.move_cursor(1);
+    /// assert_eq!(Some(false), pattern.next());
+    /// ```
+    pub fn move_cursor(&mut self, step: usize) {
+        self.cursor = if self.is_in_range(step) {
+            step
+        } else {
+            self.last_index()
+        };
     }
 
     /// Returns the state of a step
@@ -267,6 +295,19 @@ impl Pattern {
         self.steps.len()
     }
 
+    /// Returns a boolean slice reprensenting the pattern
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use rhythms::Pattern;
+    /// let pattern = Pattern::new(4, 2, 1);
+    /// assert_eq!([false, true, false, true], pattern.as_slice());
+    /// ```
+    pub fn as_slice(&self) -> &[bool] {
+        self.steps.as_slice()
+    }
+
     /// Returns the next step in a pattern. If the end of the pattern is reached, it resets
     /// the cursor and will return the first step
     ///
@@ -289,47 +330,6 @@ impl Pattern {
             self.move_cursor(self.cursor + 1);
         }
         step
-    }
-
-    /// Resets the pattern cursor to the first step
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::new(4, 2, 0);
-    /// assert_eq!([true, false, true, false], pattern.as_slice());
-    /// assert_eq!(Some(true), pattern.next());
-    /// pattern.reset();
-    /// assert_eq!(Some(true), pattern.next());
-    /// ```
-    pub fn reset(&mut self) {
-        self.move_cursor(0);
-    }
-
-    /// Moves the pattern cursor to step. If step overflows, it will move to the last step
-    ///
-    /// # Arguments
-    ///
-    /// * `step` - Step identifiyer. Range starts at 0
-    /// 
-    /// # Examples
-    ///
-    /// ```
-    /// use rhythms::Pattern;
-    /// let mut pattern = Pattern::new(4, 2, 0);
-    /// assert_eq!([true, false, true, false], pattern.as_slice());
-    /// assert_eq!(Some(true), pattern.next());
-    /// assert_eq!(Some(false), pattern.next());
-    /// pattern.move_cursor(1);
-    /// assert_eq!(Some(false), pattern.next());
-    /// ```
-    pub fn move_cursor(&mut self, step: usize) {
-        self.cursor = if self.is_in_range(step) {
-            step
-        } else {
-            self.last_index()
-        };
     }
 
     fn is_in_range(&self, step: usize) -> bool {
