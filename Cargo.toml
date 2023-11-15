@@ -11,4 +11,4 @@ readme = "README.md"
 exclude = [".github"]
 
 [dependencies]
-smallvec = "1.5"
+heapless = "0.8.0"
