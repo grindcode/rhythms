@@ -15,7 +15,8 @@ This project is under development and the current API is subjective to change. P
 ```
 use rhythms::Pattern;
 
-let pattern = Pattern::new(4, 2, 0);
+// Initialize the Pattern struct with a maximum of 64 steps
+let pattern = Pattern::<64>::new(4, 2, 0);
 assert_eq!([true, false, true, false], pattern.as_slice());
 
 // or
