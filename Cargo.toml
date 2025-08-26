@@ -11,4 +11,4 @@ readme = "README.md"
 exclude = [".github"]
 
 [dependencies]
-heapless = "0.8.0"
+heapless = "0.9.1"
